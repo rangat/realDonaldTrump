@@ -21,9 +21,21 @@ def parse_interview(speeches_dir):
     return question_answers
 
 def load_documents(documents):
-    stoplist = set('for a of the and to in'.split())
-    texts = [[word for word in document.lower().split() if word not in stoplist]
-             for document in documents]
+    stoplist = []
+
+    with open("stopwords.txt") as f:
+        for line in f:
+            stoplist.append(line.strip())
+    stoplist = set(stoplist)
+
+    texts = []
+    for document in documents:
+        text = []
+        for word in document.lower().split():
+            word = word.replace(",", "").replace(".", "").replace("-", "")
+            if word not in stoplist:
+                text.append(word)
+        texts.append(text)
 
     return texts
 
@@ -31,6 +43,12 @@ def find_best_answer(texts, question):
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
     model = models.TfidfModel(corpus, normalize=True)
+
+    # LSI experimentation
+    corpus_tfidf = model[corpus]
+    lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=2)
+    corpus_lsi = lsi[corpus_tfidf]
+    lsi.print_topics(2)
 
     vec_bow = dictionary.doc2bow(question.lower().split())
     vec_tfidf = model[vec_bow]
