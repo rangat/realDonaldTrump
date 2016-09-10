@@ -11,7 +11,6 @@ def parse_interview(speeches_dir):
     for filename in os.listdir(speeches_dir):
         filename = os.path.join(speeches_dir, filename)
         with open(filename) as f:
-            print(filename)
             for line in f:
                 if line.startswith("Q:"):
                     current_question = line[2:].strip()
@@ -30,6 +29,7 @@ def load_documents(documents):
     stoplist = set(stoplist)
 
     texts = []
+    keyword_full_answer_mapping = {}
     for document in documents:
         text = []
         for word in document.lower().split():
@@ -42,7 +42,12 @@ def load_documents(documents):
         if text:
             texts.append(text)
 
-    return texts
+            # Generate the key from the keywords
+            text.sort()
+            key = "".join(text)
+            keyword_full_answer_mapping[key] = document
+
+    return keyword_full_answer_mapping, texts
 
 def find_best_answer(texts, question):
     dictionary = corpora.Dictionary(texts)
@@ -67,11 +72,11 @@ def find_best_answer(texts, question):
 
 def get_trump_answer(question):
     question_answers = parse_interview('speeches')
-    documents = list(question_answers.keys())
-    texts = load_documents(question_answers.keys())
+    keyword_full_answer_mapping, texts = load_documents(question_answers.values())
 
     answer_index = find_best_answer(texts, question)
+    key = "".join(texts[answer_index])
 
-    return question_answers[documents[answer_index]]
+    return keyword_full_answer_mapping[key]
 
-print(get_trump_answer('Thank you'))
+print(get_trump_answer('Do you like Clinton?'))
