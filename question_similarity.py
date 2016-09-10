@@ -17,7 +17,7 @@ read_from_cache = False
 class POSifiedText(markovify.NewlineText):
     def word_split(self, sentence):
         tagset = None
-        tokens = nltk.word_tokenize(sentence)
+        tokens = re.split(self.word_split_pattern, sentence)
         tags = nltk.tag._pos_tag(tokens, tagset, tagger)
         words = ["::".join(tag) for tag in tags]
         return words
