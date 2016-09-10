@@ -108,16 +108,10 @@ def generate_trump_sentences(keyword_full_answer_mapping):
 
     model_all = POSifiedText("\n".join(markov_text))
 
-    with open("speeches/famous_quotes.txt") as f:
-        quotes = f.read()
-
-    model_quotes = POSifiedText(quotes)
-    model_combo = markovify.combine([model_quotes, model_all], [3, 1])
-
     generated_sentence = None
     while generated_sentence is None:
-        generated_sentence = model_combo.make_short_sentence(140)
+        generated_sentence = model_all.make_short_sentence(140)
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_trump_answer('doctor'))
+print(get_trump_answer('what\'s going on?'))
