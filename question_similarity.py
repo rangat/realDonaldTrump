@@ -1,18 +1,25 @@
 import logging
 import os
+import json
 import re
 
 from gensim import corpora, models, similarities
 import markovify
 import nltk
+from nltk.tag.perceptron import PerceptronTagger
 
+tagger = PerceptronTagger()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+read_from_cache = True
 
 
 class POSifiedText(markovify.NewlineText):
     def word_split(self, sentence):
-        words = re.split(self.word_split_pattern, sentence)
-        words = ["::".join(tag) for tag in nltk.pos_tag(words)]
+        tagset = None
+        tokens = nltk.word_tokenize(sentence)
+        tags = nltk.tag._pos_tag(tokens, tagset, tagger)
+        words = ["::".join(tag) for tag in tags]
         return words
 
     def word_join(self, words):
@@ -86,9 +93,16 @@ def find_best_answer(texts, processed_question):
     return simularity_scores
 
 
-def get_answer(identifier, folder_name, question):
-    corpus = parse_corpus('{identifier}:'.format(identifier=identifier), folder_name)
-    keyword_full_answer_mapping, texts = extract_keywords(corpus)
+def get_answer(identifier, directory, question):
+    if read_from_cache:
+        keyword_full_answer_mapping = json.load(open(os.path.join(directory, "keyword_full_answer_mapping.json"), 'r'))
+        texts = json.load(open(os.path.join(directory, "texts.json"), 'r'))
+    else:
+        corpus = parse_corpus('{identifier}:'.format(identifier=identifier), directory)
+        keyword_full_answer_mapping, texts = extract_keywords(corpus)
+
+        json.dump(keyword_full_answer_mapping, open(os.path.join(directory, "keyword_full_answer_mapping.json"),'w'))
+        json.dump(texts, open(os.path.join(directory, "texts.json"),'w'))
 
     _, processed_question = extract_keywords([question])
 
