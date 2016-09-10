@@ -1,5 +1,6 @@
 from collections import defaultdict
 import logging, os, re
+from pprint import pprint
 
 from gensim import corpora, models, similarities
 import markovify
@@ -34,10 +35,12 @@ def parse_interview(speeches_dir):
 
 def load_documents(documents):
     stoplist = []
+    stemmer = nltk.stem.SnowballStemmer('english')
 
     with open("stopwords.txt") as f:
         for line in f:
-            stoplist.append(line.strip())
+            word_stem = stemmer.stem(line.strip())
+            stoplist.append(word_stem)
     stoplist = set(stoplist)
 
     texts = []
@@ -48,9 +51,12 @@ def load_documents(documents):
             # Strip contractions
             word = re.sub(r'[\'’][a-z]{1,2}', "", word)
             # Strip grammatical markings
-            word = re.sub(u'[,?.;\'-._!—&]', "", word)
-            if word and word not in stoplist:
-                text.append(word)
+            word = re.sub(u'[\[\]”",?.;\'-._!—&]', "", word)
+
+            word_stem = stemmer.stem(word)
+
+            if word_stem and word_stem not in stoplist:
+                text.append(word_stem)
         if text:
             texts.append(text)
 
@@ -114,4 +120,4 @@ def generate_trump_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_trump_answer('how are you'))
+print(get_trump_answer('clinton'))
