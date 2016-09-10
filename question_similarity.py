@@ -20,18 +20,19 @@ class POSifiedText(markovify.NewlineText):
         return sentence
 
 
-def parse_interview(speeches_dir):
-    trump_answers = []
+def parse_corpus(identifier, speeches_dir):
+    answers = []
     for filename in os.listdir(speeches_dir):
         filename = os.path.join(speeches_dir, filename)
         with open(filename) as f:
             for line in f:
-                if line.startswith("TRUMP:"):
-                    trump_answers.append(line[6:].strip())
-    return trump_answers
+                if line.startswith(identifier):
+                    identifier_length = len(identifier)
+                    answers.append(line[identifier_length:].strip())
+    return answers
 
 
-def load_documents(documents):
+def extract_keywords(documents):
     stoplist = []
     stemmer = nltk.stem.SnowballStemmer('english')
 
@@ -74,22 +75,22 @@ def find_best_answer(texts, processed_question):
     corpus_tfidf = tfidf[corpus]
     lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=300)
 
-    vec_bow = dictionary.doc2bow(processed_question)
-    vec_lsi = lsi[vec_bow]
+    question_vector_bow = dictionary.doc2bow(processed_question)
+    question_vector_lsi = lsi[question_vector_bow]
 
     index = similarities.MatrixSimilarity(lsi[corpus])
 
-    sims = index[vec_lsi]
-    sims = sorted(enumerate(sims), key=lambda item: -item[1])
+    simularity_scores = index[question_vector_lsi]
+    simularity_scores = sorted(enumerate(simularity_scores), key=lambda item: -item[1])
 
-    return sims
+    return simularity_scores
 
 
-def get_trump_answer(question):
-    trump_answers = parse_interview('speeches')
-    keyword_full_answer_mapping, texts = load_documents(trump_answers)
+def get_answer(identifier, question):
+    corpus = parse_corpus('{identifier}:'.format(identifier=identifier), 'speeches')
+    keyword_full_answer_mapping, texts = extract_keywords(corpus)
 
-    _, processed_question = load_documents([question])
+    _, processed_question = extract_keywords([question])
 
     if processed_question:
         similarity_scores = find_best_answer(texts, processed_question[0])
@@ -98,10 +99,10 @@ def get_trump_answer(question):
             key = "".join(texts[answer_index])
             return keyword_full_answer_mapping[key]
 
-    return generate_trump_sentences(keyword_full_answer_mapping)
+    return generate_sentences(keyword_full_answer_mapping)
 
 
-def generate_trump_sentences(keyword_full_answer_mapping):
+def generate_sentences(keyword_full_answer_mapping):
     markov_text = []
     for answer in keyword_full_answer_mapping.values():
         markov_text.append(answer)
@@ -114,4 +115,4 @@ def generate_trump_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_trump_answer('what\'s going on?'))
+print(get_answer('TRUMP', 'what\'s going on?'))
