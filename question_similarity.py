@@ -51,7 +51,7 @@ def load_documents(documents):
             # Strip contractions
             word = re.sub(r'[\'’][a-z]{1,2}', "", word)
             # Strip grammatical markings
-            word = re.sub(u'[\[\]”",?.;\'-._!—&]', "", word)
+            word = ''.join(e for e in word if e.isalpha())
 
             word_stem = stemmer.stem(word)
 
@@ -120,4 +120,4 @@ def generate_trump_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_trump_answer('clinton'))
+print(get_trump_answer('nafta'))
