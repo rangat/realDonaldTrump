@@ -1,5 +1,5 @@
 from collections import defaultdict
-import logging, os
+import logging, os, re
 
 from gensim import corpora, models, similarities
 
@@ -11,6 +11,7 @@ def parse_interview(speeches_dir):
     for filename in os.listdir(speeches_dir):
         filename = os.path.join(speeches_dir, filename)
         with open(filename) as f:
+            print(filename)
             for line in f:
                 if line.startswith("Q:"):
                     current_question = line[2:].strip()
@@ -32,8 +33,8 @@ def load_documents(documents):
     for document in documents:
         text = []
         for word in document.lower().split():
-            word = word.replace(",", "").replace(".", "").replace("-", "")
-            if word not in stoplist:
+            word = re.sub(u'[,?.;\'-._!—]', "", word)
+            if word and word not in stoplist:
                 text.append(word)
         texts.append(text)
 
@@ -69,4 +70,4 @@ def get_trump_answer(question):
 
     return question_answers[documents[answer_index]]
 
-print(get_trump_answer('PennApps'))
+print(get_trump_answer('where is allepo'))
