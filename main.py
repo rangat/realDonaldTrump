@@ -26,5 +26,5 @@ if(slack.rtm_connect()):
                  if(message.get("text") is None):
                      print("NONE")
                  if(message.get("text") is not  None and message.get("user") !=  "U2A7XR81X"):
-                    slack.api_call("chat.postMessage", as_user="true", channel=chan, text=message.get("text"))
+                     slack.api_call("chat.postMessage", as_user="true", channel=chan, text=message.get("text"))
                 
