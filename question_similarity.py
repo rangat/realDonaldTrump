@@ -49,7 +49,7 @@ def load_documents(documents):
 
     return keyword_full_answer_mapping, texts
 
-def find_best_answer(texts, question):
+def find_best_answer(texts, processed_question):
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
     model = models.TfidfModel(corpus, normalize=True)
@@ -60,23 +60,24 @@ def find_best_answer(texts, question):
     corpus_lsi = lsi[corpus_tfidf]
     lsi.print_topics(2)
 
-    vec_bow = dictionary.doc2bow(question.lower().split())
+    vec_bow = dictionary.doc2bow(processed_question)
     vec_tfidf = model[vec_bow]
 
     index = similarities.MatrixSimilarity(model[corpus])
 
     sims = index[vec_tfidf]
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
-
     return sims[0][0]
 
 def get_trump_answer(question):
     question_answers = parse_interview('speeches')
     keyword_full_answer_mapping, texts = load_documents(question_answers.values())
 
-    answer_index = find_best_answer(texts, question)
+    _, processed_question = load_documents([question])
+
+    answer_index = find_best_answer(texts, processed_question[0])
     key = "".join(texts[answer_index])
 
     return keyword_full_answer_mapping[key]
 
-print(get_trump_answer('Do you like Clinton?'))
+print(get_trump_answer('Who is Obama?'))
