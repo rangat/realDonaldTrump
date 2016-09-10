@@ -52,20 +52,18 @@ def load_documents(documents):
 def find_best_answer(texts, processed_question):
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
-    model = models.TfidfModel(corpus, normalize=True)
+    tfidf = models.TfidfModel(corpus, normalize=True)
 
-    # LSI experimentation
-    corpus_tfidf = model[corpus]
-    lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=2)
+    corpus_tfidf = tfidf[corpus]
+    lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=300)
     corpus_lsi = lsi[corpus_tfidf]
-    lsi.print_topics(2)
 
     vec_bow = dictionary.doc2bow(processed_question)
-    vec_tfidf = model[vec_bow]
+    vec_lsi = lsi[vec_bow]
 
-    index = similarities.MatrixSimilarity(model[corpus])
+    index = similarities.MatrixSimilarity(lsi[corpus])
 
-    sims = index[vec_tfidf]
+    sims = index[vec_lsi]
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
     return sims[0][0]
 
@@ -80,4 +78,4 @@ def get_trump_answer(question):
 
     return keyword_full_answer_mapping[key]
 
-print(get_trump_answer('Who is Obama?'))
+print(get_trump_answer('What is the best thing about Obama'))
