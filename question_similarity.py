@@ -33,10 +33,14 @@ def load_documents(documents):
     for document in documents:
         text = []
         for word in document.lower().split():
-            word = re.sub(u'[,?.;\'-._!—]', "", word)
+            # Strip contractions
+            word = re.sub(r'[\'’][a-z]{1,2}', "", word)
+            # Strip grammatical markings
+            word = re.sub(u'[,?.;\'-._!—&]', "", word)
             if word and word not in stoplist:
                 text.append(word)
-        texts.append(text)
+        if text:
+            texts.append(text)
 
     return texts
 
