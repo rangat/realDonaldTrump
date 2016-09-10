@@ -11,7 +11,7 @@ from nltk.tag.perceptron import PerceptronTagger
 tagger = PerceptronTagger()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-read_from_cache = True
+read_from_cache = False
 
 
 class POSifiedText(markovify.NewlineText):
