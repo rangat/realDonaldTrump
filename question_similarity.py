@@ -74,4 +74,4 @@ def get_trump_answer(question):
 
     return question_answers[documents[answer_index]]
 
-print(get_trump_answer('where is allepo'))
+print(get_trump_answer('Thank you'))
