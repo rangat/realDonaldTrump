@@ -1,6 +1,6 @@
-from collections import defaultdict
-import logging, os, re
-from pprint import pprint
+import logging
+import os
+import re
 
 from gensim import corpora, models, similarities
 import markovify
@@ -8,32 +8,28 @@ import nltk
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
+
 class POSifiedText(markovify.NewlineText):
     def word_split(self, sentence):
         words = re.split(self.word_split_pattern, sentence)
-        words = [ "::".join(tag) for tag in nltk.pos_tag(words) ]
+        words = ["::".join(tag) for tag in nltk.pos_tag(words)]
         return words
 
     def word_join(self, words):
         sentence = " ".join(word.split("::")[0] for word in words)
         return sentence
 
+
 def parse_interview(speeches_dir):
-    question_answers = {}
-    current_question = ""
+    trump_answers = []
     for filename in os.listdir(speeches_dir):
         filename = os.path.join(speeches_dir, filename)
         with open(filename) as f:
-            print(filename)    
             for line in f:
-                if line.startswith("Q:"):
-                    current_question = line[2:].strip()
-                elif line.startswith("TRUMP:"):
-                    print(line)
-                    if current_question not in question_answers:
-                        question_answers[current_question] = ''
-                        question_answers[current_question] += line[6:].strip()
-    return question_answers
+                if line.startswith("TRUMP:"):
+                    trump_answers.append(line[6:].strip())
+    return trump_answers
+
 
 def load_documents(documents):
     stoplist = []
@@ -69,6 +65,7 @@ def load_documents(documents):
 
     return keyword_full_answer_mapping, texts
 
+
 def find_best_answer(texts, processed_question):
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
@@ -76,7 +73,6 @@ def find_best_answer(texts, processed_question):
 
     corpus_tfidf = tfidf[corpus]
     lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=300)
-    corpus_lsi = lsi[corpus_tfidf]
 
     vec_bow = dictionary.doc2bow(processed_question)
     vec_lsi = lsi[vec_bow]
@@ -88,9 +84,10 @@ def find_best_answer(texts, processed_question):
 
     return sims
 
+
 def get_trump_answer(question):
-    question_answers = parse_interview('speeches')
-    keyword_full_answer_mapping, texts = load_documents(question_answers.values())
+    trump_answers = parse_interview('speeches')
+    keyword_full_answer_mapping, texts = load_documents(trump_answers)
 
     _, processed_question = load_documents([question])
 
@@ -103,6 +100,7 @@ def get_trump_answer(question):
 
     return generate_trump_sentences(keyword_full_answer_mapping)
 
+
 def generate_trump_sentences(keyword_full_answer_mapping):
     markov_text = []
     for answer in keyword_full_answer_mapping.values():
@@ -114,7 +112,7 @@ def generate_trump_sentences(keyword_full_answer_mapping):
         quotes = f.read()
 
     model_quotes = POSifiedText(quotes)
-    model_combo = markovify.combine([ model_quotes, model_all ], [ 3, 1 ])
+    model_combo = markovify.combine([model_quotes, model_all], [3, 1])
 
     generated_sentence = None
     while generated_sentence is None:
@@ -122,4 +120,4 @@ def generate_trump_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_trump_answer('nafta'))
+print(get_trump_answer('doctor'))
