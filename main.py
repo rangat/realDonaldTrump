@@ -1,10 +1,10 @@
 from slackclient import SlackClient
+import question_similarity as q
 BOT_NAME = 'readldonalddrumpf'
 slack = SlackClient('api_key')
 
 botid = 'U2A7XR8I1'
 chan ="C2A7YGWRM"
-print slack.api_call("auth.test")
 def channel_info(channel_id):
         channel_info = slack.api_call("channels.info", channel=channel_id)
         if channel_info:
@@ -26,5 +26,6 @@ if(slack.rtm_connect()):
                  if(message.get("text") is None):
                      print("NONE")
                  if(message.get("text") is not  None and message.get("user") !=  "U2A7XR81X"):
-                     slack.api_call("chat.postMessage", as_user="true", channel=chan, text=message.get("text"))
+                     mes = q.get_trump_answer(message.get("text"))
+                     slack.api_call("chat.postMessage", as_user="true", channel=chan, text=mes)
                 
