@@ -1,21 +1,23 @@
 from collections import defaultdict
-import logging
+import logging, os
 
 from gensim import corpora, models, similarities
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-def parse_interview(filename):
+def parse_interview(speeches_dir):
     question_answers = {}
     current_question = ""
-    with open(filename) as f:
-        for line in f:
-            if line.startswith("##"):
-                current_question = line[2:].strip()
-            elif line.startswith("#"):
-                if current_question not in question_answers:
-                    question_answers[current_question] = ''
-                    question_answers[current_question] += line[1:].strip()
+    for filename in os.listdir(speeches_dir):
+        filename = os.path.join(speeches_dir, filename)
+        with open(filename) as f:
+            for line in f:
+                if line.startswith("Q:"):
+                    current_question = line[2:].strip()
+                elif line.startswith("TRUMP:"):
+                    if current_question not in question_answers:
+                        question_answers[current_question] = ''
+                        question_answers[current_question] += line[6:].strip()
     return question_answers
 
 def load_documents(documents):
@@ -41,7 +43,7 @@ def find_best_answer(texts, question):
     return sims[0][0]
 
 def get_trump_answer(question):
-    question_answers = parse_interview("interviews.txt")
+    question_answers = parse_interview('speeches')
     documents = list(question_answers.keys())
     texts = load_documents(question_answers.keys())
 
