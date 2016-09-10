@@ -40,12 +40,13 @@ def find_best_answer(texts, question):
 
     return sims[0][0]
 
-question_answers = parse_interview("interviews.txt")
-documents = list(question_answers.keys())
+def get_trump_answer(question):
+    question_answers = parse_interview("interviews.txt")
+    documents = list(question_answers.keys())
+    texts = load_documents(question_answers.keys())
 
-question = "Kurds"
+    answer_index = find_best_answer(texts, question)
 
-texts = load_documents(question_answers.keys())
-answer_index = find_best_answer(texts, question)
+    return documents[answer_index]
 
-print(documents[answer_index])
+print(get_trump_answer('trump'))
