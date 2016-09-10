@@ -15,6 +15,14 @@ documents = ["Human machine interface for lab abc computer applications",
              "Graph minors IV Widths of trees and well quasi ordering",
              "Graph minors A survey"]
 
+def parse_interview(filename):
+    with open(filename) as f:
+        for line in f:
+            if line.startswith("##"):
+                print("answer")
+            elif line.startswith("#"):
+                print("question")
+
 def load_documents(documents):
     stoplist = set('for a of the and to in'.split())
     texts = [[word for word in document.lower().split() if word not in stoplist]
@@ -37,9 +45,11 @@ def find_best_answer(texts, question):
 
     return sims[0][0]
 
-question = "survey"
+parse_interview("interviews.txt")
 
-texts = load_documents(documents)
-answer_index = find_best_answer(texts, question)
-
-print(documents[answer_index])
+# question = "survey"
+#
+# texts = load_documents(documents)
+# answer_index = find_best_answer(texts, question)
+#
+# print(documents[answer_index])
