@@ -5,23 +5,18 @@ from gensim import corpora, models, similarities
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-documents = ["Human machine interface for lab abc computer applications",
-             "A survey of user opinion of computer system response time",
-             "The EPS user interface management system",
-             "System and human system engineering testing of EPS",
-             "Relation of user perceived response time to error measurement",
-             "The generation of random binary unordered trees",
-             "The intersection graph of paths in trees",
-             "Graph minors IV Widths of trees and well quasi ordering",
-             "Graph minors A survey"]
-
 def parse_interview(filename):
+    question_answers = {}
+    current_question = ""
     with open(filename) as f:
         for line in f:
             if line.startswith("##"):
-                print("answer")
+                current_question = line[2:].strip()
             elif line.startswith("#"):
-                print("question")
+                if current_question not in question_answers:
+                    question_answers[current_question] = ''
+                    question_answers[current_question] += line[1:].strip()
+    return question_answers
 
 def load_documents(documents):
     stoplist = set('for a of the and to in'.split())
@@ -45,11 +40,12 @@ def find_best_answer(texts, question):
 
     return sims[0][0]
 
-parse_interview("interviews.txt")
+question_answers = parse_interview("interviews.txt")
+documents = list(question_answers.keys())
 
-# question = "survey"
-#
-# texts = load_documents(documents)
-# answer_index = find_best_answer(texts, question)
-#
-# print(documents[answer_index])
+question = "Kurds"
+
+texts = load_documents(question_answers.keys())
+answer_index = find_best_answer(texts, question)
+
+print(documents[answer_index])
