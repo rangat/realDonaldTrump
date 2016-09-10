@@ -47,6 +47,6 @@ def get_trump_answer(question):
 
     answer_index = find_best_answer(texts, question)
 
-    return documents[answer_index]
+    return question_answers[documents[answer_index]]
 
-print(get_trump_answer('trump'))
+print(get_trump_answer('PennApps'))
