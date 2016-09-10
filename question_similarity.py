@@ -24,10 +24,12 @@ def parse_interview(speeches_dir):
     for filename in os.listdir(speeches_dir):
         filename = os.path.join(speeches_dir, filename)
         with open(filename) as f:
+            print(filename)    
             for line in f:
                 if line.startswith("Q:"):
                     current_question = line[2:].strip()
                 elif line.startswith("TRUMP:"):
+                    print(line)
                     if current_question not in question_answers:
                         question_answers[current_question] = ''
                         question_answers[current_question] += line[6:].strip()
