@@ -106,12 +106,23 @@ def get_answer(identifier, directory, question):
 
     _, processed_question = extract_keywords([question])
 
+    print("Question: {question}".format(question=question))
+    print("Question keyword stems: {processed_question}".format(processed_question=", ".join(processed_question[0])))
+
     if processed_question:
         similarity_scores = find_best_answer(texts, processed_question[0])
         if similarity_scores[0][1] > 0:
-            answer_index = similarity_scores[0][0]
-            key = "".join(texts[answer_index])
-            return keyword_full_answer_mapping[key]
+            print("Most relevant answers:\n")
+            most_relevant_answers = similarity_scores[0:3]
+
+            keys = []
+
+            for index, score in most_relevant_answers:
+                key = "".join(texts[index])
+                keys.append(key)
+                print("Answer ({similarity_score}): {answer}".format(similarity_score=score, answer=keyword_full_answer_mapping[key]))
+
+            return keyword_full_answer_mapping[keys[0]]
 
     return generate_sentences(keyword_full_answer_mapping)
 
@@ -129,4 +140,4 @@ def generate_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_answer('TRUMP', 'trump_speeches', 'bernie'))
+print(get_answer('TRUMP', 'trump_speeches', 'like hilary clinton'))
