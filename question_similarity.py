@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+from random import randint
 import re
 
 from gensim import corpora, models, similarities
@@ -109,7 +110,8 @@ def get_answer(identifier, directory, question):
     if processed_question:
         similarity_scores = find_best_answer(texts, processed_question[0])
         if similarity_scores[0][1] > 0:
-            answer_index = similarity_scores[0][0]
+            random_answer = randint(0, 2)
+            answer_index = similarity_scores[random_answer][0]
             key = "".join(texts[answer_index])
             return keyword_full_answer_mapping[key]
 
@@ -118,6 +120,7 @@ def get_answer(identifier, directory, question):
 
 def generate_sentences(keyword_full_answer_mapping):
     markov_text = []
+
     for answer in keyword_full_answer_mapping.values():
         markov_text.append(answer)
 
@@ -129,4 +132,4 @@ def generate_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_answer('TRUMP', 'trump_speeches', 'what\'s going on?'))
+print(get_answer('TRUMP', 'trump_speeches', 'obama'))
