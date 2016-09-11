@@ -129,4 +129,4 @@ def generate_sentences(keyword_full_answer_mapping):
     generated_sentence = " ".join(word.split("::")[0] for word in generated_sentence.split(" "))
     return generated_sentence
 
-print(get_answer('TRUMP', 'trump_speeches', 'what\'s going on?'))
+print(get_answer('TRUMP', 'trump_speeches', 'bernie'))
