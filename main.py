@@ -3,6 +3,7 @@ import question_similarity as q
 BOT_NAME = 'readldonalddrumpf'
 slack = SlackClient('api-key')
 
+counter = 0
 botid = 'U2A7XR8I1'
 chan ="C2A7YGWRM"
 def channel_info(channel_id):
@@ -22,9 +23,22 @@ if(slack.rtm_connect()):
              mes = slack.rtm_read()
              for message in mes:
                  print (message.get("user"))
+                 print ( message)
                  if(message.get("text") is None):
                      print("NONE")
+                 
                  if(message.get("text") is not  None and message.get("user") !=  "U2A7XR81X"):
-                     mes = q.get_answer("TRUMP",'trump_speeches',message.get("text"))
-                     slack.api_call("chat.postMessage", as_user="true", channel=chan, text=mes)
+                     if(message.get("channel") == "C2ABDJB6K" and message.get("bot_id") != None):
+                         counter = counter + 1
+                         print("YAYAYAYAY")
+                     
+                         if(counter <=5):
+                             print(counter)      
+                             mes = q.get_answer("TRUMP",'trump_speeches',message.get("text"))
+                             slack.api_call("chat.postMessage", as_user="true", channel=message.get("channel"), text=mes)
+                         if(counter > 5 ):
+                             print("ok")
+                     else:
+                        mes = q.get_answer("TRUMP",'trump_speeches',message.get("text"))
+                        slack.api_call("chat.postMessage", as_user="true", channel=message.get("channel"), text=mes)
                 
